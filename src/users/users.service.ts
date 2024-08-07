@@ -1,4 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user-dto';
+import { UpdateUserDto } from './dto/update-user-dto';
 
 @Injectable()
 export class UsersService {
@@ -50,28 +52,28 @@ export class UsersService {
         return user
     }
 
-    create(user: { name: string, email: string, role: 'INTERN' | 'ENGINEER' | 'ADMIN' }) {
+    create(createUserDto: CreateUserDto) {
         const sortedByID = [...this.users].sort((a, b) => a.id - b.id)
         const newUser = {
             id: sortedByID[sortedByID.length - 1].id + 1,
-            ...user
+            ...createUserDto
         }
         this.users.push(newUser)
         return newUser
     }
 
-    update(id: number, updatedUser: { name?: string, email?: string, role?: 'INTERN' | 'ENGINEER' | 'ADMIN' }) {
+    update(id: number, updateUserDto: UpdateUserDto) {
         let updateUserIndex = this.users.findIndex(user => user.id === id);
         if (updateUserIndex === -1) {
             throw new HttpException('User not found to update', HttpStatus.NOT_FOUND);
         }
-        this.users[updateUserIndex] = { ...this.users[updateUserIndex], ...updatedUser };
+        this.users[updateUserIndex] = { ...this.users[updateUserIndex], ...updateUserDto };
         return this.findOne(id);
     }
 
     delete(id: number) {
         const removedUser = this.findOne(id)
-        if (removedUser) {
+        if (!removedUser) {
             throw new HttpException('User not found to delete', HttpStatus.NOT_FOUND);
         }
         this.users = this.users.filter(user => user.id !== id)
